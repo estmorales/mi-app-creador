@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CreatorFlow Studio — Gestión para Creadores de Contenido</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                        },
+                        accent: {
+                            pink: '#ec4899',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                            amber: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar & Mobile App Aesthetics */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.4);
+            border-radius: 9999px;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: #090d16;
+            color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2.2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white pb-24 md:pb-8 md:pl-64">
+
+    <!-- ================= SIDEBAR (DESKTOP) / BOTTOM BAR (MOBILE) ================= -->
+    <aside class="fixed bottom-0 left-0 right-0 z-40 glass-nav md:top-0 md:bottom-0 md:w-64 md:border-t-0 md:border-r md:border-slate-800/80 flex md:flex-col justify-around md:justify-between p-2 md:p-5">
+        <!-- Brand Header (Desktop only) -->
+        <div class="hidden md:flex items-center gap-3 px-2 py-3 mb-6">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-accent-pink flex items-center justify-center shadow-lg shadow-brand-500/30">
+                <i data-lucide="clapperboard" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-display font-bold text-lg tracking-tight text-white leading-none">CreatorFlow</h1>
+                <span class="text-xs text-slate-400 font-medium">Studio & Finanzas</span>
+            </div>
+        </div>
+
+        <!-- Navigation Items -->
+        <nav class="flex md:flex-col w-full justify-around md:justify-start gap-1 md:gap-2 items-center md:items-stretch">
+            <button onclick="switchTab('agenda')" id="nav-agenda" class="nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all text-brand-400 bg-brand-500/10">
+                <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                <span>Agenda</span>
+                <span id="badge-agenda" class="hidden md:ml-auto bg-brand-500/20 text-brand-300 text-[11px] px-2 py-0.5 rounded-full font-semibold">0</span>
+            </button>
+
+            <button onclick="switchTab('proyectos')" id="nav-proyectos" class="nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
+                <i data-lucide="video" class="w-5 h-5"></i>
+                <span>Proyectos</span>
+                <span id="badge-proyectos" class="hidden md:ml-auto bg-slate-800 text-slate-300 text-[11px] px-2 py-0.5 rounded-full font-semibold">0</span>
+            </button>
+
+            <!-- Floating Add Button on Mobile / Prominent CTA on Desktop -->
+            <button onclick="openProjectModal()" class="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 -mt-6 md:mt-3 md:mb-3 bg-gradient-to-r from-brand-600 to-accent-pink text-white font-semibold p-3.5 md:px-4 md:py-3 rounded-2xl shadow-lg shadow-brand-500/30 hover:opacity-95 active:scale-95 transition-all">
+                <i data-lucide="plus" class="w-6 h-6 md:w-5 md:h-5"></i>
+                <span class="text-[10px] md:text-sm">Nuevo Trabajo</span>
+            </button>
+
+            <button onclick="switchTab('guiones')" id="nav-guiones" class="nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                <span>Guiones</span>
+            </button>
+
+            <button onclick="switchTab('finanzas')" id="nav-finanzas" class="nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-medium transition-all text-slate-400 hover:text-slate-200">
+                <i data-lucide="receipt" class="w-5 h-5"></i>
+                <span>Facturas</span>
+            </button>
+        </nav>
+
+        <!-- Desktop Footer Stats -->
+        <div class="hidden md:block mt-auto pt-4 border-t border-slate-800/80">
+            <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800">
+                <p class="text-xs text-slate-400 mb-1">Meta Mensual</p>
+                <div class="flex items-baseline justify-between mb-2">
+                    <span id="sidebar-month-total" class="font-display font-bold text-sm text-emerald-400">$0</span>
+                    <span class="text-[11px] text-slate-500">Meta: $3,500</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="sidebar-goal-bar" class="h-full bg-gradient-to-r from-brand-500 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ================= TOP HEADER (MOBILE & DESKTOP) ================= -->
+    <header class="sticky top-0 z-30 glass-nav border-t-0 border-b border-slate-800/80 px-4 py-3.5 md:px-8">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="md:hidden w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-pink flex items-center justify-center shadow-md shadow-brand-500/20">
+                    <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i>
+                </div>
+                <div>
+                    <h2 id="header-title" class="font-display font-bold text-base md:text-xl text-white">Agenda y Recordatorios</h2>
+                    <p id="header-subtitle" class="text-xs text-slate-400">Tus fechas de grabación, edición, entregas y posteos</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Quick Equipment Filter Pill -->
+                <button onclick="cycleEquipmentFilter()" id="equip-filter-btn" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-800 border border-slate-700/70 text-xs font-medium text-slate-200 flex items-center gap-1.5 transition">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 text-brand-400"></i>
+                    <span id="equip-filter-label">Todo Equipo</span>
+                </button>
+                <!-- Reset Demo Data Button -->
+                <button onclick="openResetModal()" title="Restaurar datos de ejemplo" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-white border border-slate-700/60 transition">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN WORKSPACE ================= -->
+    <main class="flex-1 px-4 py-5 md:px-8 max-w-6xl w-full mx-auto space-y-6">
+
+        <!-- 1. TAB: AGENDA & RECORDATORIOS -->
+        <section id="tab-agenda" class="space-y-6">
+            <!-- Quick Summary Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Por Grabar</p>
+                        <p id="stat-record" class="font-display font-bold text-lg text-white">0</p>
+                    </div>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                        <i data-lucide="scissors" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Alertas Edición</p>
+                        <p id="stat-edit" class="font-display font-bold text-lg text-white">0</p>
+                    </div>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Entregas Marca</p>
+                        <p id="stat-deliver" class="font-display font-bold text-lg text-white">0</p>
+                    </div>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                        <i data-lucide="share-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-slate-400 font-medium">Posteos Redes</p>
+                        <p id="stat-post" class="font-display font-bold text-lg text-white">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Filter Pills -->
+            <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1">
+                <div class="flex items-center gap-1.5">
+                    <button onclick="setAgendaFilter('all')" id="af-all" class="agenda-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white transition">Todas las Fechas</button>
+                    <button onclick="setAgendaFilter('grabar')" id="af-grabar" class="agenda-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-rose-400"></span> Grabación
+                    </button>
+                    <button onclick="setAgendaFilter('editar')" id="af-editar" class="agenda-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-400"></span> Recordatorio Edición
+                    </button>
+                    <button onclick="setAgendaFilter('entregar')" id="af-entregar" class="agenda-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Entrega Final
+                    </button>
+                    <button onclick="setAgendaFilter('postear')" id="af-postear" class="agenda-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 text-slate-300 hover:bg-slate-800 transition flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Posteo Redes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Agenda List -->
+            <div id="agenda-timeline-container" class="space-y-3"></div>
+        </section>
+
+        <!-- 2. TAB: PROYECTOS, ENTREGAS & CORRECCIONES -->
+        <section id="tab-proyectos" class="hidden space-y-5">
+            <!-- Search & Content Type Filter Bar -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="search-projects" oninput="renderProjects()" placeholder="Buscar por marca, campaña o equipo..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                </div>
+                <select id="filter-type" onchange="renderProjects()" class="px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                    <option value="ALL">Todos los formatos</option>
+                    <option value="Reel">Reel</option>
+                    <option value="Posteo / Carrusel">Posteo / Carrusel</option>
+                    <option value="Fotos">Fotos</option>
+                    <option value="Set de Historias">Set de Historias</option>
+                    <option value="UGC">UGC (Solo marca)</option>
+                </select>
+                <select id="filter-status" onchange="renderProjects()" class="px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                    <option value="ALL">Todos los estados</option>
+                    <option value="1. Guion/Brief">1. Guion/Brief</option>
+                    <option value="2. Por Grabar">2. Por Grabar</option>
+                    <option value="3. En Edición">3. En Edición</option>
+                    <option value="4. En Revisión">4. En Revisión</option>
+                    <option value="5. Correcciones">5. Correcciones</option>
+                    <option value="6. Aprobado">6. Aprobado</option>
+                    <option value="7. Entregado/Publicado">7. Entregado/Publicado</option>
+                </select>
+            </div>
+
+            <!-- Projects Grid -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <!-- 3. TAB: GUIONES & TELEPROMPTER DE GRABACIÓN -->
+        <section id="tab-guiones" class="hidden space-y-5">
+            <div class="glass-card p-4 rounded-2xl border border-brand-500/20 bg-gradient-to-r from-brand-900/20 to-slate-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-300 shrink-0 mt-0.5">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-bold text-sm md:text-base text-white">Estudio de Guiones & Teleprompter</h3>
+                        <p class="text-xs text-slate-300">Revisa qué equipo usarás (Cámara o Celular), edita el gancho/cuerpo/CTA y abre el modo Teleprompter al grabar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="scripts-list" class="grid grid-cols-1 gap-4"></div>
+        </section>
+
+        <!-- 4. TAB: FINANZAS Y FACTURAS MENSUALES -->
+        <section id="tab-finanzas" class="hidden space-y-6">
+            <!-- Month Selector & New Invoice CTA -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <label for="finance-month-filter" class="text-xs font-medium text-slate-400">Mes Fiscal:</label>
+                    <select id="finance-month-filter" onchange="renderFinances()" class="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm font-semibold text-white focus:outline-none focus:border-brand-500">
+                        <option value="ALL">Todos los meses</option>
+                        <option value="2026-10" selected>Octubre 2026</option>
+                        <option value="2026-09">Septiembre 2026</option>
+                        <option value="2026-11">Noviembre 2026</option>
+                    </select>
+                </div>
+                <button onclick="openInvoiceModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs md:text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/25 transition">
+                    <i data-lucide="file-up" class="w-4 h-4"></i>
+                    <span>Subir Factura Mensual</span>
+                </button>
+            </div>
+
+            <!-- Financial Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-emerald-500">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span>Total Pagado / Cobrado</span>
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                    </div>
+                    <p id="fin-paid" class="font-display font-extrabold text-2xl text-emerald-400">$0</p>
+                    <p id="fin-paid-count" class="text-[11px] text-slate-400 mt-1">0 facturas liquidadas</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-amber-500">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span>Facturado (Por Cobrar)</span>
+                        <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
+                    </div>
+                    <p id="fin-billed" class="font-display font-extrabold text-2xl text-amber-400">$0</p>
+                    <p id="fin-billed-count" class="text-[11px] text-slate-400 mt-1">0 facturas en espera</p>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-brand-500">
+                    <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span>Total Producido en Trabajos</span>
+                        <i data-lucide="wallet" class="w-4 h-4 text-brand-400"></i>
+                    </div>
+                    <p id="fin-projected" class="font-display font-extrabold text-2xl text-white">$0</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Suma de todos tus proyectos activos</p>
+                </div>
+            </div>
+
+            <!-- Invoices List & Uploaded Receipts -->
+            <div class="glass-card rounded-2xl p-4 md:p-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-display font-bold text-base text-white">Control de Facturas Emitidas</h3>
+                        <p class="text-xs text-slate-400">Adjunta el PDF o captura de tus facturas mensuales y vincula cada campaña</p>
+                    </div>
+                </div>
+                <div id="invoices-list" class="space-y-3"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODAL: CREAR / EDITAR PROYECTO ================= -->
+    <div id="project-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-t-3xl sm:rounded-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/95 sticky top-0 z-10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                    </div>
+                    <h3 id="project-modal-title" class="font-display font-bold text-base text-white">Agendar Nuevo Contenido</h3>
+                </div>
+                <button onclick="closeProjectModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Form -->
+            <form id="project-form" onsubmit="saveProject(event)" class="p-5 overflow-y-auto space-y-5 text-sm">
+                <input type="hidden" id="proj-id">
+
+                <!-- 1. Datos de la Marca y Precio -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div class="sm:col-span-1">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Marca / Cliente *</label>
+                        <input type="text" id="proj-brand" required placeholder="Ej. Nike, Samsung, Cafetería..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div class="sm:col-span-1">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Título de la Campaña *</label>
+                        <input type="text" id="proj-title" required placeholder="Ej. Unboxing + Test de Batería" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div class="sm:col-span-1">
+                        <label class="block text-xs font-semibold text-emerald-400 mb-1">Monto Cobrado (USD/$) *</label>
+                        <input type="number" step="0.01" id="proj-price" required placeholder="Ej. 450" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-emerald-500/40 text-white font-semibold focus:outline-none focus:border-emerald-400">
+                    </div>
+                </div>
+
+                <!-- 2. Tipo de Contenido y Estado -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Contenido *</label>
+                        <select id="proj-type" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-white focus:outline-none focus:border-brand-500">
+                            <option value="Reel">🎬 Reel / TikTok</option>
+                            <option value="Posteo / Carrusel">🖼️ Posteo / Carrusel</option>
+                            <option value="Fotos">📸 Pack de Fotos</option>
+                            <option value="Set de Historias">📱 Set de Historias</option>
+                            <option value="UGC">📦 Video UGC (Solo entrega a marca)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Estado del Trabajo</label>
+                        <select id="proj-status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-white focus:outline-none focus:border-brand-500">
+                            <option value="1. Guion/Brief">1. Guion / Brief</option>
+                            <option value="2. Por Grabar">2. Por Grabar</option>
+                            <option value="3. En Edición">3. En Edición</option>
+                            <option value="4. En Revisión">4. En Revisión (Marca)</option>
+                            <option value="5. Correcciones">5. Correcciones Solicitadas</option>
+                            <option value="6. Aprobado">6. Aprobado / Listo</option>
+                            <option value="7. Entregado/Publicado">7. Entregado / Publicado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. Con qué se va a grabar (Celular o Cámara) -->
+                <div class="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/80 space-y-3">
+                    <label class="block text-xs font-semibold text-slate-300">¿Con qué equipo vas a grabar este contenido?</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="proj-equipment" value="Celular" checked class="peer hidden">
+                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-brand-500 peer-checked:bg-brand-500/15 flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 peer-checked:text-white transition">
+                                <i data-lucide="smartphone" class="w-4 h-4 text-brand-400"></i>
+                                <span>Celular (9:16 Nativo)</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="proj-equipment" value="Cámara" class="peer hidden">
+                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-900/60 peer-checked:border-cyan-500 peer-checked:bg-cyan-500/15 flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 peer-checked:text-white transition">
+                                <i data-lucide="camera" class="w-4 h-4 text-cyan-400"></i>
+                                <span>Cámara Profesional</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="text" id="proj-gear-notes" placeholder="Notas de equipo (Ej. Lente 24mm, Micrófono DJI, Luz cenital, 4K 60fps...)" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <!-- 4. Cronograma de Fechas y Recordatorios -->
+                <div class="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                            <i data-lucide="calendar" class="w-4 h-4 text-brand-400"></i> Fechas Clave y Recordatorio de Edición
+                        </span>
+                        <label class="flex items-center gap-2 cursor-pointer text-xs text-amber-300 font-medium">
+                            <input type="checkbox" id="proj-edit-reminder" checked class="rounded text-amber-500 focus:ring-0">
+                            <span>Activar alerta para editar</span>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-rose-300 font-medium mb-1">🎥 Fecha de Grabación</label>
+                            <input type="date" id="proj-date-record" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-amber-300 font-medium mb-1">✂️ Recordatorio para Editar</label>
+                            <input type="date" id="proj-date-edit" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-cyan-300 font-medium mb-1">📦 Entrega de Trabajo Final (Marca)</label>
+                            <input type="date" id="proj-date-delivery" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-emerald-300 font-medium mb-1">🚀 Fecha de Posteo en Redes</label>
+                            <input type="date" id="proj-date-post" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Solicitudes de la Marca y Guion -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Solicitudes de la Marca (Brief, menciones obligatorias, hashtags, restricciones)</label>
+                        <textarea id="proj-brief" rows="2" placeholder="Ej. Mostrar empaque en los primeros 3 seg, etiquetar a @marca, no mostrar otras marcas..." class="w-full px-3.5 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-brand-300 mb-1">⚡ Gancho (Primeros 3s)</label>
+                            <textarea id="proj-hook" rows="3" placeholder="Frase o acción visual para retener..." class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-cyan-300 mb-1">🎬 Cuerpo del Guion</label>
+                            <textarea id="proj-body" rows="3" placeholder="Desarrollo, demostración y beneficios..." class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-300 mb-1">📣 Llamado a la Acción (CTA)</label>
+                            <textarea id="proj-cta" rows="3" placeholder="Ej. Comenta 'LINK' o entra al enlace de mi perfil..." class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Correcciones o Solicitudes Adicionales -->
+                <div>
+                    <label class="block text-xs font-semibold text-amber-300 mb-1">Notas de Correcciones de la Marca o Solicitudes Adicionales (Una por línea)</label>
+                    <textarea id="proj-revisions" rows="2" placeholder="Ej. Cambiar música por audio tendencia&#10;Subir el logo un 15% al final&#10;Entregar versión limpia sin textos" class="w-full px-3.5 py-2 rounded-xl bg-slate-800/90 border border-amber-500/30 text-xs text-white focus:outline-none focus:border-amber-400"></textarea>
+                </div>
+
+                <!-- Submit Footer -->
+                <div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-800">
+                    <button type="button" onclick="closeProjectModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-accent-pink text-white text-xs font-semibold shadow-lg shadow-brand-500/25">Guardar Contenido</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: SUBIR FACTURA MENSUAL ================= -->
+    <div id="invoice-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <i data-lucide="file-Spreadsheet" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-base text-white">Registrar Factura Mensual</h3>
+                </div>
+                <button onclick="closeInvoiceModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="invoice-form" onsubmit="saveInvoice(event)" class="p-5 overflow-y-auto space-y-4 text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Número de Factura *</label>
+                        <input type="text" id="inv-number" required placeholder="Ej. FAC-2026-018" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Mes Correspondiente *</label>
+                        <select id="inv-month" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs">
+                            <option value="2026-10">Octubre 2026</option>
+                            <option value="2026-09">Septiembre 2026</option>
+                            <option value="2026-11">Noviembre 2026</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Vincular con Trabajo / Marca *</label>
+                    <select id="inv-project-select" onchange="autoFillInvoiceAmount()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs"></select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-400 mb-1">Monto Facturado ($) *</label>
+                        <input type="number" step="0.01" id="inv-amount" required placeholder="450.00" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Estado del Pago *</label>
+                        <select id="inv-status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs">
+                            <option value="Pagado">✅ Pagado</option>
+                            <option value="Facturado">⏳ Facturado (En espera)</option>
+                            <option value="Pendiente">📝 Pendiente de Facturar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Subida de Archivo PDF o Imagen de la Factura -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Adjuntar PDF o Imagen de la Factura Efectuada</label>
+                    <label for="inv-file" class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-700 hover:border-brand-500 rounded-2xl bg-slate-800/40 cursor-pointer transition text-center">
+                        <i data-lucide="upload-cloud" class="w-7 h-7 text-brand-400 mb-1"></i>
+                        <span id="inv-file-label" class="text-xs text-slate-300 font-medium">Toca para elegir el PDF o foto de tu factura</span>
+                        <span class="text-[11px] text-slate-500 mt-0.5">Soporta PDF, JPG o PNG</span>
+                        <input type="file" id="inv-file" accept=".pdf,image/*" onchange="handleInvoiceFileSelect(event)" class="hidden">
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Notas de Facturación / Retenciones</label>
+                    <input type="text" id="inv-notes" placeholder="Ej. Pago a 30 días, transferencia bancaria, incluye derechos de imagen..." class="w-full px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs">
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t border-slate-800">
+                    <button type="button" onclick="closeInvoiceModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold">Guardar Factura</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: TELEPROMPTER MODO GRABACIÓN ================= -->
+    <div id="teleprompter-modal" class="fixed inset-0 z-50 hidden bg-black/95 flex flex-col justify-between p-5 md:p-10">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div class="flex items-center gap-3">
+                <span id="tp-equip-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30"></span>
+                <div>
+                    <h3 id="tp-title" class="font-display font-bold text-white text-base md:text-lg"></h3>
+                    <p id="tp-gear" class="text-xs text-slate-400"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="changeTeleprompterFont(2)" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold">A+</button>
+                <button onclick="changeTeleprompterFont(-2)" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold">A-</button>
+                <button onclick="closeTeleprompter()" class="p-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="tp-scroll-area" class="my-auto overflow-y-auto max-w-3xl mx-auto w-full py-8 space-y-6 text-center">
+            <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs md:text-sm text-left">
+                <strong class="block text-amber-400 uppercase tracking-wider text-[11px] mb-1">Solicitudes Obligatorias de la Marca (Brief):</strong>
+                <span id="tp-brief"></span>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <span class="px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 text-xs font-bold uppercase tracking-wider">1. Gancho (0-3 seg)</span>
+                    <p id="tp-hook" class="mt-3 font-display font-bold text-white leading-relaxed" style="font-size: 26px;"></p>
+                </div>
+                <div>
+                    <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-wider">2. Desarrollo / Cuerpo</span>
+                    <p id="tp-body" class="mt-3 font-sans font-medium text-slate-100 leading-relaxed" style="font-size: 24px;"></p>
+                </div>
+                <div>
+                    <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider">3. Llamado a la acción (CTA)</span>
+                    <p id="tp-cta" class="mt-3 font-display font-bold text-emerald-300 leading-relaxed" style="font-size: 24px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-4 flex items-center justify-between text-xs text-slate-400">
+            <span>Tip: Mantén la vista cerca del lente al leer el gancho</span>
+            <button onclick="closeTeleprompter()" class="px-4 py-2 rounded-xl bg-slate-800 text-white font-semibold">Cerrar Teleprompter</button>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: CONFIRMAR RESTAURACIÓN DE DATOS ================= -->
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 max-w-sm w-full rounded-2xl p-5 space-y-4">
+            <h3 class="font-display font-bold text-base text-white">¿Restaurar datos de demostración?</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">Esto restablecerá las campañas, guiones y facturas de ejemplo iniciales.</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancelar</button>
+                <button onclick="confirmResetDemo()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold">Sí, restaurar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden px-4 py-3 rounded-2xl bg-slate-900 border border-brand-500/50 text-white text-xs font-semibold shadow-2xl flex items-center gap-2.5">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-msg">Guardado correctamente</span>
+    </div>
+
+    <!-- ================= APPLICATION LOGIC ================= -->
+    <script>
+        // --- 1. INITIAL SAMPLE DATA (REALISTIC CONTENT CREATOR WORKFLOW) ---
+        const DEFAULT_PROJECTS = [
+            {
+                id: 'p1',
+                brand: 'Samsung Latam',
+                title: 'Reel Modo Nocturno Galaxy S26',
+                type: 'Reel',
+                equipment: 'Celular',
+                gearNotes: 'Grabar con cámara trasera 4K 60fps + Micrófono DJI Mic 2',
+                status: '2. Por Grabar',
+                price: 850,
+                editReminder: true,
+                dateRecord: '2026-10-17',
+                dateEdit: '2026-10-19',
+                dateDelivery: '2026-10-21',
+                datePost: '2026-10-24',
+                brief: 'Mostrar transición de un lugar con poca luz a la toma nocturna nítida. Prohibido usar filtros de terceros. Etiquetar a @SamsungLatin y usar #Nightography.',
+                hook: '¿Todavía tus videos de noche salen llenos de ruido? Mira esta prueba real en plena calle.',
+                body: 'Salí a probar el sensor principal sin luces adicionales. Fíjense cómo estabiliza mientras camino y mantiene el color real de los letreros de neón sin quemar la imagen.',
+                cta: 'Cuéntame en comentarios del 1 al 10 qué te pareció la estabilización y revisa el link de mi perfil.',
+                revisions: [
+                    { text: 'Incluir plano cercano del módulo de cámaras en el segundo 4', done: false },
+                    { text: 'Enviar también versión limpia sin subtítulos para pauta', done: true }
+                ]
+            },
+            {
+                id: 'p2',
+                brand: ' Sony Alpha / Tienda Foto',
+                title: 'Set de Fotos + Carrusel Setup Creador',
+                type: 'Posteo / Carrusel',
+                equipment: 'Cámara',
+                gearNotes: 'Cámara Sony A7IV + Lente 35mm f/1.4 GM + Luz rebotada cálida',
+                status: '5. Correcciones',
+                price: 620,
+                editReminder: true,
+                dateRecord: '2026-10-14',
+                dateEdit: '2026-10-16',
+                dateDelivery: '2026-10-18',
+                datePost: '2026-10-20',
+                brief: 'Carrusel de 6 fotos mostrando el detrás de cámaras de cómo iluminas tu estudio y 2 retratos editados en formato 4:5.',
+                hook: 'Mis 3 ajustes de cámara infalibles para que tus fotos en interiores parezcan de cine.',
+                body: 'Desliza para ver el esquema de una sola luz con difusor octogonal, los parámetros exactos de obturación y la comparativa sin editar vs. editada.',
+                cta: 'Guarda este post para tu próxima sesión de fotos.',
+                revisions: [
+                    { text: 'Aclarar un poco las sombras en la foto #3 donde aparece el lente', done: false },
+                    { text: 'Agregar sticker o mención del código de descuento en la última diapositiva', done: false }
+                ]
+            },
+            {
+                id: 'p3',
+                brand: 'Nescafé Artisan',
+                title: 'Set de 4 Historias Rutina de Edición Mañanera',
+                type: 'Set de Historias',
+                equipment: 'Celular',
+                gearNotes: 'iPhone en trípode de escritorio + luz natural de ventana',
+                status: '3. En Edición',
+                price: 380,
+                editReminder: true,
+                dateRecord: '2026-10-15',
+                dateEdit: '2026-10-17',
+                dateDelivery: '2026-10-18',
+                datePost: '2026-10-19',
+                brief: '4 historias orgánicas: 1. Preparando el café antes de editar, 2. Timelapse editando, 3. Encuesta interactiva, 4. Sticker de enlace oficial.',
+                hook: 'Hoy toca maratón de edición de 5 videos... y así arranca mi mañana.',
+                body: 'Preparo mi taza espumosa en 30 segundos mientras abro el proyecto. Les dejo encuesta: ¿ustedes editan de mañana o de madrugada?',
+                cta: 'Toca el sticker de aquí abajo para probar la nueva edición limitada.',
+                revisions: [
+                    { text: 'Verificar que el sticker de link no tape el frasco en la historia 4', done: true }
+                ]
+            },
+            {
+                id: 'p4',
+                brand: 'Logitech Creators',
+                title: 'Pack 2 Videos UGC Teclado & Mouse',
+                type: 'UGC',
+                equipment: 'Cámara',
+                gearNotes: 'Cámara en toma cenital (Top-Down) + Audio ASMR con micrófono condensador',
+                status: '7. Entregado/Publicado',
+                price: 950,
+                editReminder: false,
+                dateRecord: '2026-10-05',
+                dateEdit: '2026-10-08',
+                dateDelivery: '2026-10-10',
+                datePost: '2026-10-12',
+                brief: 'Contenido UGC exclusivo para anuncios de la marca. No requiere posteo en redes propias, solo entrega de carpeta con originales y editados.',
+                hook: 'El sonido de este teclado mecánico hizo que trabajar 8 horas sea adictivo.',
+                body: 'Conecta hasta 3 dispositivos al mismo tiempo con un botón y la batería dura semanas.',
+                cta: 'Haz clic en Más Información para ver los colores disponibles.',
+                revisions: []
+            }
+        ];
+
+        const DEFAULT_INVOICES = [
+            {
+                id: 'inv1',
+                number: 'FAC-2026-041',
+                month: '2026-10',
+                projectId: 'p4',
+                brandName: 'Logitech Creators — Pack 2 Videos UGC',
+                amount: 950,
+                status: 'Pagado',
+                fileName: 'Factura_Logitech_Oct2026.pdf',
+                fileSize: '245 KB',
+                fileDataUrl: null,
+                notes: 'Transferencia internacional recibida el 12 de Octubre.'
+            },
+            {
+                id: 'inv2',
+                number: 'FAC-2026-042',
+                month: '2026-10',
+                projectId: 'p2',
+                brandName: 'Sony Alpha — Carrusel Setup Creador',
+                amount: 620,
+                status: 'Facturado',
+                fileName: 'Factura_SonyAlpha_042.pdf',
+                fileSize: '198 KB',
+                fileDataUrl: null,
+                notes: 'Orden de compra aprobada. Pago programado a 15 días.'
+            },
+            {
+                id: 'inv3',
+                number: 'FAC-2026-043',
+                month: '2026-10',
+                projectId: 'p1',
+                brandName: 'Samsung Latam — Reel Modo Nocturno',
+                amount: 850,
+                status: 'Pendiente',
+                fileName: 'Pendiente de adjuntar PDF',
+                fileSize: '—',
+                fileDataUrl: null,
+                notes: 'Emitir factura apenas se apruebe el primer corte.'
+            }
+        ];
+
+        // --- 2. STATE MANAGEMENT ---
+        let projects = [];
+        let invoices = [];
+        let currentTab = 'agenda';
+        let currentAgendaFilter = 'all';
+        let equipmentFilter = 'ALL'; // 'ALL', 'Celular', 'Cámara'
+        let pendingInvoiceFile = null;
+        let teleprompterFontSize = 24;
+
+        function loadState() {
+            try {
+                const savedProj = localStorage.getItem('cf_projects_v1');
+                const savedInv = localStorage.getItem('cf_invoices_v1');
+                projects = savedProj ? JSON.parse(savedProj) : JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+                invoices = savedInv ? JSON.parse(savedInv) : JSON.parse(JSON.stringify(DEFAULT_INVOICES));
+            } catch (e) {
+                projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+                invoices = JSON.parse(JSON.stringify(DEFAULT_INVOICES));
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('cf_projects_v1', JSON.stringify(projects));
+                localStorage.setItem('cf_invoices_v1', JSON.stringify(invoices));
+            } catch (e) {
+                console.error('Error guardando en LocalStorage:', e);
+            }
+            refreshAllViews();
+        }
+
+        // --- 3. NAVIGATION & FILTERS ---
+        function switchTab(tab) {
+            currentTab = tab;
+            const tabs = ['agenda', 'proyectos', 'guiones', 'finanzas'];
+            tabs.forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const btn = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    section.classList.remove('hidden');
+                    btn.classList.add('text-brand-400', 'bg-brand-500/10');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    section.classList.add('hidden');
+                    btn.classList.remove('text-brand-400', 'bg-brand-500/10');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+
+            const titles = {
+                agenda: ['Agenda y Recordatorios', 'Tus fechas de grabación, edición, entregas y posteos'],
+                proyectos: ['Proyectos y Entregas', 'Controla el estado, equipo de grabación y correcciones de marcas'],
+                guiones: ['Guiones y Teleprompter', 'Estructura gancho, desarrollo, CTA y graba con teleprompter'],
+                finanzas: ['Finanzas y Facturas Mensuales', 'Control de montos cobrados y archivo de facturas PDF/imagen']
+            };
+            document.getElementById('header-title').textContent = titles[tab][0];
+            document.getElementById('header-subtitle').textContent = titles[tab][1];
+            lucide.createIcons();
+        }
+
+        function cycleEquipmentFilter() {
+            const order = ['ALL', 'Celular', 'Cámara'];
+            const nextIndex = (order.indexOf(equipmentFilter) + 1) % order.length;
+            equipmentFilter = order[nextIndex];
+
+            const label = document.getElementById('equip-filter-label');
+            if (equipmentFilter === 'ALL') label.textContent = 'Todo Equipo';
+            if (equipmentFilter === 'Celular') label.textContent = '📱 Solo Celular';
+            if (equipmentFilter === 'Cámara') label.textContent = '📷 Solo Cámara';
+
+            refreshAllViews();
+        }
+
+        function setAgendaFilter(filter) {
+            currentAgendaFilter = filter;
+            document.querySelectorAll('.agenda-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white');
+                btn.classList.add('bg-slate-800/90', 'text-slate-300');
+            });
+            const activeBtn = document.getElementById(`af-${filter}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-800/90', 'text-slate-300');
+                activeBtn.classList.add('bg-brand-600', 'text-white');
+            }
+            renderAgenda();
+        }
+
+        // --- 4. AGENDA & REMINDERS RENDERING ---
+        function formatSpanishDate(dateStr) {
+            if (!dateStr) return 'Sin fecha';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+            return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+        }
+
+        function getDaysDiff(dateStr) {
+            if (!dateStr) return 999;
+            const today = new Date('2026-10-16T00:00:00');
+            const target = new Date(dateStr + 'T00:00:00');
+            return Math.round((target - today) / (1000 * 60 * 60 * 24));
+        }
+
+        function renderAgenda() {
+            const filteredProjects = projects.filter(p => equipmentFilter === 'ALL' || p.equipment === equipmentFilter);
+
+            // Update Top Summary Counters
+            const countRecord = filteredProjects.filter(p => p.status === '1. Guion/Brief' || p.status === '2. Por Grabar').length;
+            const countEdit = filteredProjects.filter(p => p.editReminder && p.status !== '7. Entregado/Publicado').length;
+            const countDeliver = filteredProjects.filter(p => p.status !== '7. Entregado/Publicado').length;
+            const countPost = filteredProjects.filter(p => p.datePost && p.status !== '7. Entregado/Publicado').length;
+
+            document.getElementById('stat-record').textContent = countRecord;
+            document.getElementById('stat-edit').textContent = countEdit;
+            document.getElementById('stat-deliver').textContent = countDeliver;
+            document.getElementById('stat-post').textContent = countPost;
+            document.getElementById('badge-agenda').textContent = countDeliver;
+            document.getElementById('badge-proyectos').textContent = filteredProjects.length;
+
+            // Build unified events list
+            let events = [];
+            filteredProjects.forEach(p => {
+                if (p.dateRecord && (currentAgendaFilter === 'all' || currentAgendaFilter === 'grabar')) {
+                    events.push({
+                        date: p.dateRecord,
+                        kind: 'grabar',
+                        kindLabel: 'Día de Grabación',
+                        color: 'rose',
+                        icon: 'video',
+                        project: p
+                    });
+                }
+                if (p.dateEdit && p.editReminder && (currentAgendaFilter === 'all' || currentAgendaFilter === 'editar')) {
+                    events.push({
+                        date: p.dateEdit,
+                        kind: 'editar',
+                        kindLabel: 'Recordatorio: Editar Contenido',
+                        color: 'amber',
+                        icon: 'bell-ring',
+                        project: p
+                    });
+                }
+                if (p.dateDelivery && (currentAgendaFilter === 'all' || currentAgendaFilter === 'entregar')) {
+                    events.push({
+                        date: p.dateDelivery,
+                        kind: 'entregar',
+                        kindLabel: 'Entrega Trabajo Final a Marca',
+                        color: 'cyan',
+                        icon: 'send',
+                        project: p
+                    });
+                }
+                if (p.datePost && (currentAgendaFilter === 'all' || currentAgendaFilter === 'postear')) {
+                    events.push({
+                        date: p.datePost,
+                        kind: 'postear',
+                        kindLabel: 'Fecha de Posteo en Redes',
+                        color: 'emerald',
+                        icon: 'share-2',
+                        project: p
+                    });
+                }
+            });
+
+            events.sort((a, b) => a.date.localeCompare(b.date));
+
+            const container = document.getElementById('agenda-timeline-container');
+            if (events.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card rounded-2xl p-8 text-center space-y-2">
+                        <p class="text-sm font-semibold text-slate-300">No hay eventos para este filtro</p>
+                        <p class="text-xs text-slate-500">Agrega un nuevo trabajo con el botón "+" para programar fechas.</p>
+                    </div>`;
+                return;
+            }
+
+            const colorClasses = {
+                rose: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+                amber: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+                cyan: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+                emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+            };
+
+            container.innerHTML = events.map(ev => {
+                const diff = getDaysDiff(ev.date);
+                let urgencyBadge = '';
+                if (ev.project.status === '7. Entregado/Publicado') {
+                    urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300">Completado</span>`;
+                } else if (diff === 0) {
+                    urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse-subtle">¡HOY!</span>`;
+                } else if (diff === 1) {
+                    urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/25 text-amber-300">Mañana</span>`;
+                } else if (diff < 0) {
+                    urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400">Hace ${Math.abs(diff)} días</span>`;
+                } else {
+                    urgencyBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">En ${diff} días</span>`;
+                }
+
+                const equipIcon = ev.project.equipment === 'Celular' ? 'smartphone' : 'camera';
+                const pendingRevs = (ev.project.revisions || []).filter(r => !r.done).length;
+
+                return `
+                <div class="glass-card p-4 rounded-2xl hover:border-slate-700 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3.5">
+                        <div class="w-11 h-11 rounded-2xl border ${colorClasses[ev.color]} flex flex-col items-center justify-center shrink-0">
+                            <i data-lucide="${ev.icon}" class="w-5 h-5"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-${ev.color}-400">${ev.kindLabel}</span>
+                                ${urgencyBadge}
+                                <span class="px-2 py-0.5 rounded-md bg-slate-800 text-[11px] text-slate-300 font-medium">${ev.project.type}</span>
+                            </div>
+                            <h4 class="font-display font-bold text-sm md:text-base text-white">${ev.project.brand} — <span class="text-slate-300 font-medium">${ev.project.title}</span></h4>
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                                <span class="flex items-center gap-1 text-slate-300">
+                                    <i data-lucide="${equipIcon}" class="w-3.5 h-3.5 text-brand-400"></i>
+                                    ${ev.project.equipment} (${ev.project.gearNotes || 'Estándar'})
+                                </span>
+                                ${pendingRevs > 0 ? `<span class="text-amber-400 font-medium">• ${pendingRevs} corrección(es) pendiente(s)</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2 border-t sm:border-t-0 border-slate-800/80 pt-2.5 sm:pt-0">
+                        <div class="text-left sm:text-right">
+                            <p class="text-xs font-bold text-white capitalize">${formatSpanishDate(ev.date)}</p>
+                            <p class="text-[11px] text-emerald-400 font-semibold">$${Number(ev.project.price).toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openTeleprompter('${ev.project.id}')" class="px-2.5 py-1.5 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 text-xs font-semibold flex items-center gap-1">
+                                <i data-lucide="play" class="w-3.5 h-3.5"></i> Guion
+                            </button>
+                            <button onclick="openProjectModal('${ev.project.id}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- 5. PROJECTS & REVISIONS RENDERING ---
+        function renderProjects() {
+            const query = (document.getElementById('search-projects')?.value || '').toLowerCase();
+            const typeFilter = document.getElementById('filter-type')?.value || 'ALL';
+            const statusFilter = document.getElementById('filter-status')?.value || 'ALL';
+
+            const filtered = projects.filter(p => {
+                const matchEquip = equipmentFilter === 'ALL' || p.equipment === equipmentFilter;
+                const matchType = typeFilter === 'ALL' || p.type === typeFilter;
+                const matchStatus = statusFilter === 'ALL' || p.status === statusFilter;
+                const matchSearch = p.brand.toLowerCase().includes(query) ||
+                                    p.title.toLowerCase().includes(query) ||
+                                    (p.gearNotes || '').toLowerCase().includes(query);
+                return matchEquip && matchType && matchStatus && matchSearch;
+            });
+
+            const grid = document.getElementById('projects-grid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full glass-card rounded-2xl p-8 text-center space-y-2">
+                        <p class="text-sm font-semibold text-slate-300">No se encontraron contenidos con esos filtros</p>
+                        <button onclick="openProjectModal()" class="mt-2 px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold">+ Crear Nuevo Contenido</button>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const isCamera = p.equipment === 'Cámara';
+                const equipBadge = isCamera
+                    ? `<span class="px-2.5 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center gap-1"><i data-lucide="camera" class="w-3.5 h-3.5"></i> Cámara</span>`
+                    : `<span class="px-2.5 py-1 rounded-lg bg-brand-500/15 border border-brand-500/30 text-brand-300 text-xs font-semibold flex items-center gap-1"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Celular</span>`;
+
+                const revisionsHtml = (p.revisions && p.revisions.length > 0)
+                    ? p.revisions.map((rev, idx) => `
+                        <label class="flex items-start gap-2 text-xs cursor-pointer p-1.5 rounded-lg hover:bg-slate-800/60">
+                            <input type="checkbox" ${rev.done ? 'checked' : ''} onchange="toggleRevision('${p.id}', ${idx})" class="mt-0.5 rounded text-brand-500">
+                            <span class="${rev.done ? 'line-through text-slate-500' : 'text-amber-200'}">${rev.text}</span>
+                        </label>`).join('')
+                    : `<p class="text-xs text-slate-500 italic">Sin correcciones pendientes de la marca.</p>`;
+
+                return `
+                <div class="glass-card rounded-2xl p-4 md:p-5 flex flex-col justify-between space-y-4 border border-slate-800/90 hover:border-slate-700 transition">
+                    <div class="space-y-3">
+                        <!-- Top Badges -->
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-white text-xs font-semibold">${p.type}</span>
+                                ${equipBadge}
+                            </div>
+                            <span class="font-display font-bold text-base text-emerald-400">$${Number(p.price).toLocaleString()}</span>
+                        </div>
+
+                        <!-- Title & Brand -->
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-brand-400">${p.brand}</p>
+                            <h3 class="font-display font-bold text-base md:text-lg text-white leading-snug">${p.title}</h3>
+                            <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                                <i data-lucide="sliders" class="w-3.5 h-3.5 text-slate-500"></i>
+                                <span>${p.gearNotes || 'Sin notas de lentes/audio'}</span>
+                            </p>
+                        </div>
+
+                        <!-- Workflow Status Selector -->
+                        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                            <span class="text-xs text-slate-400 font-medium">Estado:</span>
+                            <select onchange="quickUpdateStatus('${p.id}', this.value)" class="bg-transparent text-xs font-bold text-amber-300 focus:outline-none cursor-pointer">
+                                ${['1. Guion/Brief','2. Por Grabar','3. En Edición','4. En Revisión','5. Correcciones','6. Aprobado','7. Entregado/Publicado'].map(st =>
+                                    `<option value="${st}" class="bg-slate-900 text-white" ${p.status === st ? 'selected' : ''}>${st}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Dates Grid -->
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                <span class="text-[10px] text-rose-400 block font-semibold">🎥 Grabación</span>
+                                <span class="text-slate-200 font-medium">${formatSpanishDate(p.dateRecord)}</span>
+                            </div>
+                            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                <span class="text-[10px] text-amber-400 block font-semibold">✂️ Alerta Edición ${p.editReminder ? '🔔' : '🔕'}</span>
+                                <span class="text-slate-200 font-medium">${formatSpanishDate(p.dateEdit)}</span>
+                            </div>
+                            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                <span class="text-[10px] text-cyan-400 block font-semibold">📦 Entrega Final</span>
+                                <span class="text-slate-200 font-medium">${formatSpanishDate(p.dateDelivery)}</span>
+                            </div>
+                            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                                <span class="text-[10px] text-emerald-400 block font-semibold">🚀 Posteo Redes</span>
+                                <span class="text-slate-200 font-medium">${formatSpanishDate(p.datePost)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Brand Revisions & Extra Requests Box -->
+                        <div class="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
+                                    <i data-lucide="message-square-warning" class="w-3.5 h-3.5"></i>
+                                    Correcciones y Solicitudes Extra
+                                </span>
+                            </div>
+                            <div class="space-y-1">
+                                ${revisionsHtml}
+                            </div>
+                            <div class="flex gap-1.5 pt-1">
+                                <input type="text" id="new-rev-${p.id}" placeholder="Anotar corrección o pedido extra de la marca..." class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-400">
+                                <button onclick="addRevision('${p.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-semibold">+ Añadir</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Actions Footer -->
+                    <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                        <button onclick="openTeleprompter('${p.id}')" class="flex-1 py-2 px-3 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 border border-brand-500/30 text-brand-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="tv" class="w-4 h-4"></i> Ver Guion / Teleprompter
+                        </button>
+                        <button onclick="openProjectModal('${p.id}')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300" title="Editar proyecto">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteProject('${p.id}')" class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- 6. SCRIPTS & TELEPROMPTER RENDERING ---
+        function renderScripts() {
+            const list = document.getElementById('scripts-list');
+            const filtered = projects.filter(p => equipmentFilter === 'ALL' || p.equipment === equipmentFilter);
+
+            list.innerHTML = filtered.map(p => `
+                <div class="glass-card rounded-2xl p-4 md:p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold uppercase text-brand-400">${p.brand}</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300">${p.type}</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-cyan-300">${p.equipment}</span>
+                            </div>
+                            <h3 class="font-display font-bold text-base text-white mt-0.5">${p.title}</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openTeleprompter('${p.id}')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-accent-pink text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Modo Teleprompter
+                            </button>
+                            <button onclick="openProjectModal('${p.id}')" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold">Editar Guion</button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-1">
+                        <span class="text-[11px] font-bold uppercase text-amber-400 block">📋 Brief y Solicitudes de la Marca:</span>
+                        <p class="text-slate-300 leading-relaxed">${p.brief || 'Sin requisitos especiales especificados.'}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/25 space-y-1">
+                            <span class="font-bold text-brand-300 uppercase text-[11px] block">⚡ 1. Gancho (0-3s)</span>
+                            <p class="text-white font-medium leading-relaxed">${p.hook || '—'}</p>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/25 space-y-1">
+                            <span class="font-bold text-cyan-300 uppercase text-[11px] block">🎬 2. Desarrollo / Cuerpo</span>
+                            <p class="text-slate-200 leading-relaxed">${p.body || '—'}</p>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-1">
+                            <span class="font-bold text-emerald-300 uppercase text-[11px] block">📣 3. Llamado a la Acción</span>
+                            <p class="text-emerald-200 font-medium leading-relaxed">${p.cta || '—'}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function openTeleprompter(projectId) {
+            const p = projects.find(item => item.id === projectId);
+            if (!p) return;
+
+            document.getElementById('tp-equip-badge').textContent = `🎥 Grabación con ${p.equipment}`;
+            document.getElementById('tp-title').textContent = `${p.brand} — ${p.title}`;
+            document.getElementById('tp-gear').textContent = p.gearNotes || 'Configuración estándar';
+            document.getElementById('tp-brief').textContent = p.brief || 'Sin restricciones adicionales.';
+            document.getElementById('tp-hook').textContent = p.hook || 'Sin gancho definido.';
+            document.getElementById('tp-body').textContent = p.body || 'Sin desarrollo definido.';
+            document.getElementById('tp-cta').textContent = p.cta || 'Sin llamado a la acción.';
+
+            document.getElementById('teleprompter-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeTeleprompter() {
+            document.getElementById('teleprompter-modal').classList.add('hidden');
+        }
+
+        function changeTeleprompterFont(delta) {
+            teleprompterFontSize = Math.max(16, Math.min(44, teleprompterFontSize + delta));
+            document.getElementById('tp-hook').style.fontSize = (teleprompterFontSize + 2) + 'px';
+            document.getElementById('tp-body').style.fontSize = teleprompterFontSize + 'px';
+            document.getElementById('tp-cta').style.fontSize = teleprompterFontSize + 'px';
+        }
+
+        // --- 7. FINANCES & MONTHLY INVOICES ---
+        function renderFinances() {
+            const monthFilter = document.getElementById('finance-month-filter')?.value || 'ALL';
+            const filteredInvoices = invoices.filter(inv => monthFilter === 'ALL' || inv.month === monthFilter);
+
+            const totalPaid = filteredInvoices.filter(i => i.status === 'Pagado').reduce((acc, i) => acc + Number(i.amount), 0);
+            const countPaid = filteredInvoices.filter(i => i.status === 'Pagado').length;
+
+            const totalBilled = filteredInvoices.filter(i => i.status === 'Facturado' || i.status === 'Pendiente').reduce((acc, i) => acc + Number(i.amount), 0);
+            const countBilled = filteredInvoices.filter(i => i.status === 'Facturado' || i.status === 'Pendiente').length;
+
+            const totalProjected = projects.reduce((acc, p) => acc + Number(p.price || 0), 0);
+
+            document.getElementById('fin-paid').textContent = `$${totalPaid.toLocaleString()}`;
+            document.getElementById('fin-paid-count').textContent = `${countPaid} factura(s) cobrada(s)`;
+
+            document.getElementById('fin-billed').textContent = `$${totalBilled.toLocaleString()}`;
+            document.getElementById('fin-billed-count').textContent = `${countBilled} factura(s) pendiente(s) de cobro`;
+
+            document.getElementById('fin-projected').textContent = `$${totalProjected.toLocaleString()}`;
+
+            // Update Desktop Sidebar Progress
+            document.getElementById('sidebar-month-total').textContent = `$${(totalPaid + totalBilled).toLocaleString()}`;
+            const goalPct = Math.min(100, Math.round(((totalPaid + totalBilled) / 3500) * 100));
+            document.getElementById('sidebar-goal-bar').style.width = `${goalPct}%`;
+
+            const list = document.getElementById('invoices-list');
+            if (filteredInvoices.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">No hay facturas registradas en este período.</p>`;
+                return;
+            }
+
+            list.innerHTML = filteredInvoices.map(inv => {
+                let statusPill = '';
+                if (inv.status === 'Pagado') {
+                    statusPill = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✅ Pagado</span>`;
+                } else if (inv.status === 'Facturado') {
+                    statusPill = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⏳ Facturado</span>`;
+                } else {
+                    statusPill = `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-700">📝 Por Facturar</span>`;
+                }
+
+                return `
+                <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="file-check-2" class="w-5 h-5"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold text-white">${inv.number}</span>
+                                <span class="text-[11px] text-slate-400">• Mes: ${inv.month}</span>
+                                ${statusPill}
+                            </div>
+                            <p class="text-sm font-semibold text-slate-200">${inv.brandName}</p>
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                                <span class="flex items-center gap-1 text-brand-300">
+                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                                    ${inv.fileName} (${inv.fileSize})
+                                </span>
+                                ${inv.notes ? `<span>• ${inv.notes}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between gap-2 border-t sm:border-t-0 border-slate-800 pt-2.5 sm:pt-0">
+                        <span class="font-display font-extrabold text-lg text-emerald-400">$${Number(inv.amount).toLocaleString()}</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="cycleInvoiceStatus('${inv.id}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 font-medium">Cambiar Estado</button>
+                            <button onclick="deleteInvoice('${inv.id}')" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // --- 8. CRUD ACTIONS FOR PROJECTS & REVISIONS ---
+        function openProjectModal(projectId = null) {
+            const form = document.getElementById('project-form');
+            form.reset();
+
+            if (projectId) {
+                const p = projects.find(item => item.id === projectId);
+                if (!p) return;
+                document.getElementById('project-modal-title').textContent = 'Editar Contenido / Campaña';
+                document.getElementById('proj-id').value = p.id;
+                document.getElementById('proj-brand').value = p.brand;
+                document.getElementById('proj-title').value = p.title;
+                document.getElementById('proj-price').value = p.price;
+                document.getElementById('proj-type').value = p.type;
+                document.getElementById('proj-status').value = p.status;
+
+                const radios = document.getElementsByName('proj-equipment');
+                radios.forEach(r => { r.checked = (r.value === p.equipment); });
+
+                document.getElementById('proj-gear-notes').value = p.gearNotes || '';
+                document.getElementById('proj-edit-reminder').checked = !!p.editReminder;
+                document.getElementById('proj-date-record').value = p.dateRecord || '';
+                document.getElementById('proj-date-edit').value = p.dateEdit || '';
+                document.getElementById('proj-date-delivery').value = p.dateDelivery || '';
+                document.getElementById('proj-date-post').value = p.datePost || '';
+                document.getElementById('proj-brief').value = p.brief || '';
+                document.getElementById('proj-hook').value = p.hook || '';
+                document.getElementById('proj-body').value = p.body || '';
+                document.getElementById('proj-cta').value = p.cta || '';
+                document.getElementById('proj-revisions').value = (p.revisions || []).map(r => r.text).join('\n');
+            } else {
+                document.getElementById('project-modal-title').textContent = 'Agendar Nuevo Contenido';
+                document.getElementById('proj-id').value = '';
+                document.getElementById('proj-date-record').value = '2026-10-18';
+                document.getElementById('proj-date-edit').value = '2026-10-20';
+                document.getElementById('proj-date-delivery').value = '2026-10-22';
+                document.getElementById('proj-date-post').value = '2026-10-25';
+            }
+
+            document.getElementById('project-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeProjectModal() {
+            document.getElementById('project-modal').classList.add('hidden');
+        }
+
+        function saveProject(event) {
+            event.preventDefault();
+            const id = document.getElementById('proj-id').value;
+            const equipRadio = document.querySelector('input[name="proj-equipment"]:checked');
+            const rawRevisions = document.getElementById('proj-revisions').value
+                .split('\n')
+                .map(line => line.trim())
+                .filter(Boolean)
+                .map(text => ({ text, done: false }));
+
+            const projectData = {
+                id: id || 'p_' + Date.now(),
+                brand: document.getElementById('proj-brand').value.trim(),
+                title: document.getElementById('proj-title').value.trim(),
+                price: parseFloat(document.getElementById('proj-price').value) || 0,
+                type: document.getElementById('proj-type').value,
+                status: document.getElementById('proj-status').value,
+                equipment: equipRadio ? equipRadio.value : 'Celular',
+                gearNotes: document.getElementById('proj-gear-notes').value.trim(),
+                editReminder: document.getElementById('proj-edit-reminder').checked,
+                dateRecord: document.getElementById('proj-date-record').value,
+                dateEdit: document.getElementById('proj-date-edit').value,
+                dateDelivery: document.getElementById('proj-date-delivery').value,
+                datePost: document.getElementById('proj-date-post').value,
+                brief: document.getElementById('proj-brief').value.trim(),
+                hook: document.getElementById('proj-hook').value.trim(),
+                body: document.getElementById('proj-body').value.trim(),
+                cta: document.getElementById('proj-cta').value.trim(),
+                revisions: rawRevisions
+            };
+
+            if (id) {
+                const idx = projects.findIndex(p => p.id === id);
+                if (idx > -1) projects[idx] = projectData;
+            } else {
+                projects.unshift(projectData);
+            }
+
+            saveState();
+            closeProjectModal();
+            showToast('Contenido guardado en tu agenda');
+        }
+
+        function quickUpdateStatus(projectId, newStatus) {
+            const p = projects.find(item => item.id === projectId);
+            if (p) {
+                p.status = newStatus;
+                saveState();
+                showToast(`Estado actualizado: ${newStatus}`);
+            }
+        }
+
+        function addRevision(projectId) {
+            const input = document.getElementById(`new-rev-${projectId}`);
+            if (!input || !input.value.trim()) return;
+            const p = projects.find(item => item.id === projectId);
+            if (p) {
+                p.revisions = p.revisions || [];
+                p.revisions.push({ text: input.value.trim(), done: false });
+                p.status = '5. Correcciones';
+                input.value = '';
+                saveState();
+                showToast('Corrección de marca agregada');
+            }
+        }
+
+        function toggleRevision(projectId, revIndex) {
+            const p = projects.find(item => item.id === projectId);
+            if (p && p.revisions && p.revisions[revIndex]) {
+                p.revisions[revIndex].done = !p.revisions[revIndex].done;
+                saveState();
+            }
+        }
+
+        function deleteProject(projectId) {
+            projects = projects.filter(p => p.id !== projectId);
+            saveState();
+            showToast('Proyecto eliminado');
+        }
+
+        // --- 9. INVOICE MANAGEMENT ---
+        function openInvoiceModal() {
+            document.getElementById('invoice-form').reset();
+            pendingInvoiceFile = null;
+            document.getElementById('inv-file-label').textContent = 'Toca para elegir el PDF o foto de tu factura';
+            document.getElementById('inv-number').value = `FAC-2026-0${44 + invoices.length}`;
+
+            const select = document.getElementById('inv-project-select');
+            select.innerHTML = projects.map(p =>
+                `<option value="${p.id}" data-price="${p.price}" data-name="${p.brand} — ${p.title}">${p.brand} — ${p.title} ($${p.price})</option>`
+            ).join('') + `<option value="custom" data-price="0" data-name="Factura General / Otro Cliente">Otro servicio de creación</option>`;
+
+            autoFillInvoiceAmount();
+            document.getElementById('invoice-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function autoFillInvoiceAmount() {
+            const select = document.getElementById('inv-project-select');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption) {
+                const price = selectedOption.getAttribute('data-price');
+                if (price && Number(price) > 0) {
+                    document.getElementById('inv-amount').value = price;
+                }
+            }
+        }
+
+        function handleInvoiceFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const sizeKB = Math.round(file.size / 1024) + ' KB';
+            pendingInvoiceFile = {
+                name: file.name,
+                size: sizeKB
+            };
+            document.getElementById('inv-file-label').textContent = `✅ Adjunto: ${file.name} (${sizeKB})`;
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoice-modal').classList.add('hidden');
+        }
+
+        function saveInvoice(event) {
+            event.preventDefault();
+            const select = document.getElementById('inv-project-select');
+            const selectedOption = select.options[select.selectedIndex];
+            const brandName = selectedOption ? selectedOption.getAttribute('data-name') : 'Cliente';
+
+            const newInv = {
+                id: 'inv_' + Date.now(),
+                number: document.getElementById('inv-number').value.trim(),
+                month: document.getElementById('inv-month').value,
+                projectId: select.value,
+                brandName: brandName,
+                amount: parseFloat(document.getElementById('inv-amount').value) || 0,
+                status: document.getElementById('inv-status').value,
+                fileName: pendingInvoiceFile ? pendingInvoiceFile.name : 'Comprobante_Digital.pdf',
+                fileSize: pendingInvoiceFile ? pendingInvoiceFile.size : '140 KB',
+                notes: document.getElementById('inv-notes').value.trim()
+            };
+
+            invoices.unshift(newInv);
+            saveState();
+            closeInvoiceModal();
+            showToast('Factura mensual registrada');
+        }
+
+        function cycleInvoiceStatus(invId) {
+            const inv = invoices.find(i => i.id === invId);
+            if (!inv) return;
+            const order = ['Pendiente', 'Facturado', 'Pagado'];
+            inv.status = order[(order.indexOf(inv.status) + 1) % order.length];
+            saveState();
+            showToast(`Factura actualizada a: ${inv.status}`);
+        }
+
+        function deleteInvoice(invId) {
+            invoices = invoices.filter(i => i.id !== invId);
+            saveState();
+            showToast('Factura eliminada');
+        }
+
+        // --- 10. UTILITIES & DEMO RESET ---
+        function openResetModal() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function confirmResetDemo() {
+            localStorage.removeItem('cf_projects_v1');
+            localStorage.removeItem('cf_invoices_v1');
+            loadState();
+            refreshAllViews();
+            closeResetModal();
+            showToast('Datos de ejemplo restaurados');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2600);
+        }
+
+        function refreshAllViews() {
+            renderAgenda();
+            renderProjects();
+            renderScripts();
+            renderFinances();
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            refreshAllViews();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
